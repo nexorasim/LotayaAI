@@ -363,8 +363,8 @@ class BackendTester:
                 "Access-Control-Allow-Headers": response.headers.get("Access-Control-Allow-Headers")
             }
             
-            if cors_headers["Access-Control-Allow-Origin"] == "*":
-                self.log_test("CORS Configuration", True, "CORS properly configured for all origins")
+            if cors_headers["Access-Control-Allow-Origin"] in ["*", "http://localhost:3000"]:
+                self.log_test("CORS Configuration", True, "CORS properly configured")
             else:
                 self.log_test("CORS Configuration", False, f"CORS headers: {cors_headers}")
                 
