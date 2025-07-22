@@ -433,7 +433,7 @@ class BackendTester:
         self.test_mongodb_connection()
         
         # Print summary
-        self.print_summary()
+        return self.print_summary()
         
     def print_summary(self):
         """Print test summary"""
