@@ -1,7 +1,8 @@
 import React, { useEffect, useRef } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useGSAP } from '@gsap/react';
 import { Link } from 'react-router-dom';
+import { gsap, ScrollTrigger, ScrollSmoother, SplitText } from '../utils/gsapConfig';
+import { LotayaAnimations } from '../utils/gsapConfig';
 import { 
   Sparkles, 
   Video, 
