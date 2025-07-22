@@ -1,8 +1,7 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 import { useGSAP } from '@gsap/react';
 import { Link } from 'react-router-dom';
-import { gsap, ScrollTrigger, ScrollSmoother, SplitText } from '../utils/gsapConfig';
-import { LotayaAnimations } from '../utils/gsapConfig';
+import GSAPAnimations from '../utils/gsapAnimations';
 import { 
   Sparkles, 
   Video, 
@@ -16,189 +15,13 @@ import {
   Wand2
 } from 'lucide-react';
 
-// Register GSAP plugins
-gsap.registerPlugin(ScrollTrigger);
-
 const LandingPage = () => {
+  const containerRef = useRef(null);
   const heroRef = useRef(null);
   const productsRef = useRef(null);
   const modelsRef = useRef(null);
   const effectsRef = useRef(null);
   const toolsRef = useRef(null);
-
-  useGSAP(() => {
-    // Initialize ScrollSmoother for premium smooth scrolling
-    ScrollSmoother.create({
-      wrapper: "#smooth-wrapper",
-      content: "#smooth-content", 
-      smooth: 2,
-      effects: true,
-      smoothTouch: 0.1
-    });
-
-    // Enhanced hero entrance with premium effects
-    const heroElements = {
-      title: heroRef.current?.querySelector('.hero-title'),
-      subtitle: heroRef.current?.querySelector('.hero-subtitle'),
-      description: heroRef.current?.querySelector('.hero-description'),
-      buttons: heroRef.current?.querySelectorAll('.hero-btn')
-    };
-
-    if (heroElements.title) {
-      LotayaAnimations.heroEntrance(heroElements);
-    }
-
-    // Advanced text effects with SplitText
-    const titles = document.querySelectorAll('.section-title');
-    titles.forEach(title => {
-      const splitTitle = new SplitText(title, { type: "chars,words" });
-      
-      gsap.fromTo(splitTitle.chars, 
-        { 
-          y: 100,
-          opacity: 0,
-          rotationX: -90
-        },
-        {
-          y: 0,
-          opacity: 1,
-          rotationX: 0,
-          duration: 1.2,
-          ease: "back.out(1.7)",
-          stagger: 0.05,
-          scrollTrigger: {
-            trigger: title,
-            start: "top 80%",
-            toggleActions: "play none none reverse"
-          }
-        }
-      );
-    });
-
-    // Enhanced products section with physics-like effects
-    const productCards = productsRef.current?.querySelectorAll('.product-card');
-    if (productCards) {
-      gsap.fromTo(productCards,
-        { 
-          y: 100, 
-          opacity: 0, 
-          scale: 0.8,
-          rotationY: -15
-        },
-        {
-          y: 0,
-          opacity: 1,
-          scale: 1,
-          rotationY: 0,
-          duration: 1.2,
-          ease: "back.out(1.7)",
-          stagger: {
-            amount: 0.8,
-            from: "center"
-          },
-          scrollTrigger: {
-            trigger: productsRef.current,
-            start: "top 70%",
-            end: "bottom 30%",
-            toggleActions: "play none none reverse"
-          }
-        }
-      );
-
-      // Add advanced 3D card interactions
-      productCards.forEach(card => {
-        LotayaAnimations.card3D(card);
-      });
-    }
-
-    // Models section with wave animation
-    const modelCards = modelsRef.current?.querySelectorAll('.model-card');
-    if (modelCards) {
-      gsap.fromTo(modelCards,
-        { 
-          x: -100, 
-          opacity: 0,
-          rotationZ: -5
-        },
-        {
-          x: 0,
-          opacity: 1,
-          rotationZ: 0,
-          duration: 1,
-          ease: "power3.out",
-          stagger: {
-            amount: 1.2,
-            from: "start"
-          },
-          scrollTrigger: {
-            trigger: modelsRef.current,
-            start: "top 80%",
-            toggleActions: "play none none reverse"
-          }
-        }
-      );
-    }
-
-    // Effects section with bounce and wiggle
-    const effectTags = effectsRef.current?.querySelectorAll('.effect-tag');
-    if (effectTags) {
-      effectTags.forEach((tag, i) => {
-        gsap.fromTo(tag,
-          {
-            scale: 0,
-            rotation: Math.random() * 360
-          },
-          {
-            scale: 1,
-            rotation: 0,
-            duration: 0.8,
-            ease: "elastic.out(1, 0.3)",
-            delay: i * 0.1,
-            scrollTrigger: {
-              trigger: effectsRef.current,
-              start: "top 80%",
-              toggleActions: "play none none reverse"
-            }
-          }
-        );
-      });
-    }
-
-    // Floating animations with custom paths
-    const floatElements = document.querySelectorAll('.float-element');
-    floatElements.forEach((element, i) => {
-      gsap.to(element, {
-        y: -30 + (i * 10),
-        rotation: 5 - (i * 2),
-        duration: 3 + (i * 0.5),
-        ease: "sine.inOut",
-        yoyo: true,
-        repeat: -1
-      });
-    });
-
-    // Particle system enhancement
-    const particles = document.querySelectorAll('.particle');
-    particles.forEach(particle => {
-      gsap.set(particle, {
-        scale: Math.random() * 0.5 + 0.5,
-        opacity: Math.random() * 0.5 + 0.3
-      });
-      
-      gsap.to(particle, {
-        y: -window.innerHeight - 100,
-        rotation: 360,
-        duration: Math.random() * 10 + 15,
-        ease: "none",
-        repeat: -1,
-        delay: Math.random() * 10
-      });
-    });
-
-    return () => {
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-    };
-  }, []);
 
   const products = [
     {
@@ -263,75 +86,149 @@ const LandingPage = () => {
     "YouTube to MP3", "TikTok Video Downloader", "Instagram Reels Downloader", "Video Compressor"
   ];
 
+  useGSAP(() => {
+    // Initialize all GSAP animations
+    const heroElements = {
+      background: heroRef.current?.querySelector('.hero-background'),
+      title: heroRef.current?.querySelector('.hero-title'),
+      subtitle: heroRef.current?.querySelector('.hero-subtitle'),
+      description: heroRef.current?.querySelector('.hero-description'),
+      buttons: heroRef.current?.querySelectorAll('.hero-btn')
+    };
+
+    // Hero entrance animation
+    if (heroElements.title) {
+      GSAPAnimations.hero.entrance(heroElements);
+    }
+
+    // Initialize button animations
+    const buttons = containerRef.current?.querySelectorAll('.animated-btn');
+    buttons?.forEach(btn => GSAPAnimations.button.init(btn));
+
+    // Initialize card animations
+    const productCards = productsRef.current?.querySelectorAll('.product-card');
+    productCards?.forEach((card, i) => {
+      GSAPAnimations.card.enter(card, i);
+      GSAPAnimations.card.hover(card);
+    });
+
+    // Initialize text animations for sections
+    const sectionTitles = containerRef.current?.querySelectorAll('.section-title');
+    sectionTitles?.forEach(title => {
+      GSAPAnimations.text.splitReveal(title);
+    });
+
+    // Models section animation
+    const modelCards = modelsRef.current?.querySelectorAll('.model-card');
+    if (modelCards) {
+      GSAPAnimations.scroll.fadeInUp(modelCards, modelsRef.current);
+    }
+
+    // Effects section animation
+    const effectTags = effectsRef.current?.querySelectorAll('.effect-tag');
+    effectTags?.forEach((tag, i) => {
+      GSAPAnimations.card.enter(tag, i * 0.1);
+    });
+
+    // Tools section animation
+    const toolCards = toolsRef.current?.querySelectorAll('.tool-card');
+    if (toolCards) {
+      GSAPAnimations.scroll.fadeInUp(toolCards, toolsRef.current);
+    }
+
+    // Initialize parallax effects
+    const parallaxElements = containerRef.current?.querySelectorAll('[data-speed]');
+    parallaxElements?.forEach(el => {
+      const speed = parseFloat(el.getAttribute('data-speed'));
+      GSAPAnimations.scroll.parallax(el, speed);
+    });
+
+    // Floating particles animation
+    const particles = containerRef.current?.querySelectorAll('.animated-particle');
+    particles?.forEach(particle => {
+      GSAPAnimations.scroll.parallax(particle, Math.random() * 0.5 + 0.2);
+    });
+
+  }, []);
+
   return (
-    <div id="smooth-wrapper" className="min-h-screen text-white overflow-hidden">
+    <div id="smooth-wrapper" ref={containerRef} className="min-h-screen text-white overflow-hidden">
       <div id="smooth-content">
-        {/* Navigation */}
-        <nav className="fixed top-0 w-full z-50 nav-glass">
+        {/* Animated Navigation */}
+        <nav className="nav-glass fixed top-0 w-full z-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center py-4">
               <div className="flex items-center space-x-2">
-                <Wand2 className="w-8 h-8 text-blue-400" />
+                <Wand2 className="w-8 h-8 text-blue-400 animated-icon" />
                 <span className="text-2xl font-orbitron font-bold bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">
                   LotayaAI
                 </span>
               </div>
               <div className="hidden md:flex space-x-6">
-                <a href="#products" className="hover:text-blue-400 transition-colors">Products</a>
-                <a href="#models" className="hover:text-purple-400 transition-colors">Models</a>
-                <a href="#tools" className="hover:text-pink-400 transition-colors">Free Tools</a>
+                <a href="#products" className="nav-link hover:text-blue-400 transition-all duration-300">Products</a>
+                <a href="#models" className="nav-link hover:text-purple-400 transition-all duration-300">Models</a>
+                <a href="#tools" className="nav-link hover:text-pink-400 transition-all duration-300">Free Tools</a>
               </div>
             </div>
           </div>
         </nav>
 
-        {/* Hero Section */}
-        <section ref={heroRef} className="relative min-h-screen flex items-center justify-center px-4">
-          {/* Enhanced animated particles background */}
-          <div className="particles-bg">
-            {[...Array(80)].map((_, i) => (
+        {/* Hero Section with GSAP Animations */}
+        <section ref={heroRef} className="hero-background relative min-h-screen flex items-center justify-center px-4" data-speed="0.5">
+          {/* Advanced Animated Particles */}
+          <div className="particles-bg absolute inset-0 z-0">
+            {[...Array(100)].map((_, i) => (
               <div 
                 key={i}
-                className="particle"
+                className="animated-particle absolute"
                 style={{
                   left: `${Math.random() * 100}%`,
-                  width: `${Math.random() * 6 + 2}px`,
-                  height: `${Math.random() * 6 + 2}px`,
-                  background: `hsl(${200 + Math.random() * 100}, 70%, 60%)`,
-                  animationDelay: `${Math.random() * 20}s`,
-                  animationDuration: `${Math.random() * 20 + 10}s`,
+                  top: `${Math.random() * 100}%`,
+                  width: `${Math.random() * 8 + 2}px`,
+                  height: `${Math.random() * 8 + 2}px`,
+                  background: `hsl(${200 + Math.random() * 160}, 70%, ${60 + Math.random() * 40}%)`,
                   borderRadius: '50%',
-                  opacity: Math.random() * 0.8 + 0.2
+                  opacity: Math.random() * 0.8 + 0.2,
+                  filter: `blur(${Math.random() * 2}px)`,
+                  boxShadow: `0 0 ${Math.random() * 20 + 10}px currentColor`
                 }}
+                data-speed={Math.random() * 0.3 + 0.1}
               />
             ))}
           </div>
 
           <div className="max-w-6xl mx-auto text-center relative z-10">
-            <div className="float-element">
-              <Stars className="w-16 h-16 mx-auto mb-8 text-blue-400 opacity-60" />
+            <div className="float-element mb-8">
+              <Stars className="w-20 h-20 mx-auto text-blue-400 opacity-70 animated-icon" />
             </div>
             
             <h1 className="hero-title text-6xl md:text-8xl font-orbitron font-bold mb-6">
               LotayaAI
             </h1>
             
-            <p className="hero-subtitle text-2xl md:text-4xl font-semibold mb-8">
+            <p className="hero-subtitle text-3xl md:text-5xl font-bold mb-8 bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 bg-clip-text text-transparent">
               AI-Powered Creative Revolution
             </p>
             
-            <p className="hero-description text-lg md:text-xl text-gray-300 mb-12 max-w-3xl mx-auto leading-relaxed">
+            <p className="hero-description text-lg md:text-xl text-gray-300 mb-16 max-w-4xl mx-auto leading-relaxed">
               Transform your creative vision into reality with cutting-edge AI tools for video and image generation. 
               Experience the future of content creation with dynamic 3D interfaces and advanced AI models.
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
-              <Link to="/image-generator" className="hero-btn btn-primary inline-flex items-center space-x-2 neon-glow">
+            <div className="flex flex-col sm:flex-row gap-8 justify-center items-center">
+              <Link 
+                to="/image-generator" 
+                className="hero-btn animated-btn btn-primary inline-flex items-center space-x-3 text-lg px-10 py-4 rounded-xl neon-glow transform-gpu"
+              >
+                <Sparkles className="w-6 h-6" />
                 <span>Start Creating</span>
-                <ArrowRight className="w-5 h-5" />
+                <ArrowRight className="w-6 h-6" />
               </Link>
-              <Link to="/free-tools" className="hero-btn btn-secondary inline-flex items-center space-x-2">
-                <Download className="w-5 h-5" />
+              <Link 
+                to="/free-tools" 
+                className="hero-btn animated-btn btn-secondary inline-flex items-center space-x-3 text-lg px-10 py-4 rounded-xl transform-gpu"
+              >
+                <Download className="w-6 h-6" />
                 <span>Free Tools</span>
               </Link>
             </div>
@@ -339,31 +236,41 @@ const LandingPage = () => {
         </section>
 
         {/* Products Section */}
-        <section id="products" ref={productsRef} className="py-20 px-4" data-speed="0.8">
+        <section id="products" ref={productsRef} className="py-32 px-4" data-speed="0.8">
           <div className="max-w-7xl mx-auto">
-            <h2 className="section-title text-4xl md:text-5xl font-orbitron font-bold text-center mb-4">
-              Our <span className="hero-title">Products</span>
-            </h2>
-            <p className="text-center text-gray-300 text-lg mb-16">
-              Comprehensive AI-powered tools for all your creative needs
-            </p>
+            <div className="text-center mb-20">
+              <h2 className="section-title text-5xl md:text-7xl font-orbitron font-bold mb-6">
+                Our <span className="bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">Products</span>
+              </h2>
+              <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+                Comprehensive AI-powered tools designed to revolutionize your creative workflow
+              </p>
+            </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
               {products.map((product, index) => (
                 <Link 
                   key={index} 
                   to={product.link}
-                  className="product-card p-8 rounded-2xl hover-lift transform-3d"
-                  data-speed={0.9 + (index * 0.1)}
+                  className="product-card group relative p-10 rounded-3xl hover-lift transform-gpu transition-all duration-500"
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    backdropFilter: 'blur(20px)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)'
+                  }}
                 >
-                  <div className={`inline-flex p-4 rounded-full bg-gradient-to-r ${product.gradient} mb-6`}>
+                  <div className={`inline-flex p-6 rounded-2xl bg-gradient-to-r ${product.gradient} mb-8 transform-gpu group-hover:scale-110 transition-transform duration-500`}>
                     {product.icon}
                   </div>
-                  <h3 className="text-xl font-bold mb-4">{product.title}</h3>
-                  <p className="text-gray-300 leading-relaxed">{product.description}</p>
-                  <div className="mt-6 flex items-center text-blue-400 font-semibold">
+                  <h3 className="text-2xl font-bold mb-6 text-white group-hover:text-blue-400 transition-colors duration-300">
+                    {product.title}
+                  </h3>
+                  <p className="text-gray-300 leading-relaxed text-lg mb-8">
+                    {product.description}
+                  </p>
+                  <div className="flex items-center text-blue-400 font-semibold text-lg group-hover:text-purple-400 transition-colors duration-300">
                     <span>Explore</span>
-                    <ArrowRight className="w-4 h-4 ml-2" />
+                    <ArrowRight className="w-5 h-5 ml-3 transform group-hover:translate-x-2 transition-transform duration-300" />
                   </div>
                 </Link>
               ))}
@@ -372,20 +279,30 @@ const LandingPage = () => {
         </section>
 
         {/* Models Section */}
-        <section id="models" ref={modelsRef} className="py-20 px-4 bg-black bg-opacity-20" data-speed="0.7">
+        <section id="models" ref={modelsRef} className="py-32 px-4 bg-black bg-opacity-30" data-speed="0.6">
           <div className="max-w-7xl mx-auto">
-            <h2 className="section-title text-4xl md:text-5xl font-orbitron font-bold text-center mb-4">
-              AI <span className="hero-subtitle">Models</span>
-            </h2>
-            <p className="text-center text-gray-300 text-lg mb-16">
-              Powered by the most advanced AI models in the industry
-            </p>
+            <div className="text-center mb-20">
+              <h2 className="section-title text-5xl md:text-7xl font-orbitron font-bold mb-6">
+                AI <span className="bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent">Models</span>
+              </h2>
+              <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+                Powered by the most advanced AI models in the industry
+              </p>
+            </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {models.map((model, index) => (
-                <div key={index} className="model-card glass p-6 rounded-xl">
-                  <h3 className="text-lg font-bold text-blue-400 mb-2">{model.name}</h3>
-                  <p className="text-gray-300">{model.specialty}</p>
+                <div 
+                  key={index} 
+                  className="model-card glass p-8 rounded-2xl transform-gpu hover:scale-105 transition-all duration-500"
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.08)',
+                    backdropFilter: 'blur(15px)',
+                    border: '1px solid rgba(255, 255, 255, 0.15)'
+                  }}
+                >
+                  <h3 className="text-xl font-bold text-blue-400 mb-4">{model.name}</h3>
+                  <p className="text-gray-300 text-lg">{model.specialty}</p>
                 </div>
               ))}
             </div>
@@ -393,15 +310,23 @@ const LandingPage = () => {
         </section>
 
         {/* Effects Section */}
-        <section ref={effectsRef} className="py-20 px-4" data-speed="0.9">
+        <section ref={effectsRef} className="py-32 px-4" data-speed="0.9">
           <div className="max-w-7xl mx-auto">
-            <h2 className="section-title text-4xl md:text-5xl font-orbitron font-bold text-center mb-16">
-              Special <span className="hero-title">Effects</span>
+            <h2 className="section-title text-5xl md:text-7xl font-orbitron font-bold text-center mb-20">
+              Special <span className="bg-gradient-to-r from-green-400 to-blue-600 bg-clip-text text-transparent">Effects</span>
             </h2>
             
-            <div className="flex flex-wrap justify-center gap-4">
+            <div className="flex flex-wrap justify-center gap-6">
               {effects.map((effect, index) => (
-                <div key={index} className="effect-tag glass px-6 py-3 rounded-full hover:bg-white hover:bg-opacity-20 transition-all duration-300">
+                <div 
+                  key={index} 
+                  className="effect-tag glass px-8 py-4 rounded-full text-lg font-semibold hover:bg-white hover:bg-opacity-20 transition-all duration-500 transform-gpu hover:scale-105"
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    backdropFilter: 'blur(10px)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)'
+                  }}
+                >
                   {effect}
                 </div>
               ))}
@@ -410,25 +335,32 @@ const LandingPage = () => {
         </section>
 
         {/* Free Tools Section */}
-        <section id="tools" ref={toolsRef} className="py-20 px-4 bg-black bg-opacity-20" data-speed="0.6">
+        <section id="tools" ref={toolsRef} className="py-32 px-4 bg-black bg-opacity-30" data-speed="0.5">
           <div className="max-w-7xl mx-auto">
-            <h2 className="section-title text-4xl md:text-5xl font-orbitron font-bold text-center mb-4">
-              Free <span className="hero-subtitle">Tools</span>
-            </h2>
-            <p className="text-center text-gray-300 text-lg mb-16">
-              Powerful utilities available at no cost
-            </p>
+            <div className="text-center mb-20">
+              <h2 className="section-title text-5xl md:text-7xl font-orbitron font-bold mb-6">
+                Free <span className="bg-gradient-to-r from-cyan-400 to-purple-600 bg-clip-text text-transparent">Tools</span>
+              </h2>
+              <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+                Powerful utilities available at no cost to enhance your workflow
+              </p>
+            </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {freeTools.map((tool, index) => (
                 <Link 
                   key={index} 
                   to="/free-tools"
-                  className="glass p-6 rounded-xl hover:bg-white hover:bg-opacity-10 transition-all duration-300 group"
+                  className="tool-card group p-8 rounded-2xl hover:bg-white hover:bg-opacity-15 transition-all duration-500 transform-gpu"
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.08)',
+                    backdropFilter: 'blur(15px)',
+                    border: '1px solid rgba(255, 255, 255, 0.15)'
+                  }}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-medium">{tool}</span>
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform" />
+                    <span className="font-semibold text-lg">{tool}</span>
+                    <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform duration-300" />
                   </div>
                 </Link>
               ))}
@@ -436,14 +368,16 @@ const LandingPage = () => {
           </div>
         </section>
 
-        {/* Footer */}
-        <footer className="py-12 px-4 border-t border-white border-opacity-10">
+        {/* Animated Footer */}
+        <footer className="py-20 px-4 border-t border-white border-opacity-20">
           <div className="max-w-7xl mx-auto text-center">
-            <div className="flex items-center justify-center space-x-2 mb-6">
-              <Wand2 className="w-6 h-6 text-blue-400" />
-              <span className="text-xl font-orbitron font-bold">LotayaAI</span>
+            <div className="flex items-center justify-center space-x-3 mb-8">
+              <Wand2 className="w-8 h-8 text-blue-400 animated-icon" />
+              <span className="text-2xl font-orbitron font-bold bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">
+                LotayaAI
+              </span>
             </div>
-            <p className="text-gray-400">
+            <p className="text-gray-400 text-lg">
               © 2025 LotayaAI. Transforming creativity with advanced AI technology.
             </p>
           </div>
