@@ -26,99 +26,173 @@ const LandingPage = () => {
   const effectsRef = useRef(null);
   const toolsRef = useRef(null);
 
-  useEffect(() => {
-    // Hero section animations
-    const heroTl = gsap.timeline();
-    
-    heroTl
-      .fromTo(heroRef.current.querySelector('.hero-title'), 
-        { y: 100, opacity: 0 }, 
-        { y: 0, opacity: 1, duration: 1.2, ease: "power3.out" })
-      .fromTo(heroRef.current.querySelector('.hero-subtitle'), 
-        { y: 50, opacity: 0 }, 
-        { y: 0, opacity: 1, duration: 1, ease: "power3.out" }, "-=0.8")
-      .fromTo(heroRef.current.querySelector('.hero-description'), 
-        { y: 30, opacity: 0 }, 
-        { y: 0, opacity: 1, duration: 0.8, ease: "power3.out" }, "-=0.6")
-      .fromTo(heroRef.current.querySelectorAll('.hero-btn'), 
-        { y: 20, opacity: 0 }, 
-        { y: 0, opacity: 1, duration: 0.6, ease: "power3.out", stagger: 0.2 }, "-=0.4");
+  useGSAP(() => {
+    // Initialize ScrollSmoother for premium smooth scrolling
+    ScrollSmoother.create({
+      wrapper: "#smooth-wrapper",
+      content: "#smooth-content", 
+      smooth: 2,
+      effects: true,
+      smoothTouch: 0.1
+    });
 
-    // Products section scroll animation
-    gsap.fromTo(productsRef.current.querySelectorAll('.product-card'),
-      { y: 50, opacity: 0, scale: 0.9 },
-      {
-        y: 0,
-        opacity: 1,
-        scale: 1,
-        duration: 0.8,
-        ease: "power3.out",
-        stagger: 0.2,
-        scrollTrigger: {
-          trigger: productsRef.current,
-          start: "top 80%",
-          end: "bottom 20%",
-          toggleActions: "play none none reverse"
-        }
-      }
-    );
+    // Enhanced hero entrance with premium effects
+    const heroElements = {
+      title: heroRef.current?.querySelector('.hero-title'),
+      subtitle: heroRef.current?.querySelector('.hero-subtitle'),
+      description: heroRef.current?.querySelector('.hero-description'),
+      buttons: heroRef.current?.querySelectorAll('.hero-btn')
+    };
 
-    // Models section animation
-    gsap.fromTo(modelsRef.current.querySelectorAll('.model-card'),
-      { x: -50, opacity: 0 },
-      {
-        x: 0,
-        opacity: 1,
-        duration: 0.6,
-        ease: "power3.out",
-        stagger: 0.1,
-        scrollTrigger: {
-          trigger: modelsRef.current,
-          start: "top 80%",
-          toggleActions: "play none none reverse"
-        }
-      }
-    );
+    if (heroElements.title) {
+      LotayaAnimations.heroEntrance(heroElements);
+    }
 
-    // 3D rotation effect for product cards
-    const cards = document.querySelectorAll('.product-card');
-    cards.forEach(card => {
-      card.addEventListener('mousemove', (e) => {
-        const rect = card.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        
-        const centerX = rect.width / 2;
-        const centerY = rect.height / 2;
-        
-        const rotateX = (y - centerY) / 10;
-        const rotateY = (centerX - x) / 10;
-        
-        gsap.to(card, {
-          duration: 0.3,
-          rotationX: rotateX,
-          rotationY: rotateY,
-          transformPerspective: 1000,
-          transformOrigin: "center center"
-        });
-      });
+    // Advanced text effects with SplitText
+    const titles = document.querySelectorAll('.section-title');
+    titles.forEach(title => {
+      const splitTitle = new SplitText(title, { type: "chars,words" });
       
-      card.addEventListener('mouseleave', () => {
-        gsap.to(card, {
-          duration: 0.3,
+      gsap.fromTo(splitTitle.chars, 
+        { 
+          y: 100,
+          opacity: 0,
+          rotationX: -90
+        },
+        {
+          y: 0,
+          opacity: 1,
           rotationX: 0,
-          rotationY: 0
-        });
+          duration: 1.2,
+          ease: "back.out(1.7)",
+          stagger: 0.05,
+          scrollTrigger: {
+            trigger: title,
+            start: "top 80%",
+            toggleActions: "play none none reverse"
+          }
+        }
+      );
+    });
+
+    // Enhanced products section with physics-like effects
+    const productCards = productsRef.current?.querySelectorAll('.product-card');
+    if (productCards) {
+      gsap.fromTo(productCards,
+        { 
+          y: 100, 
+          opacity: 0, 
+          scale: 0.8,
+          rotationY: -15
+        },
+        {
+          y: 0,
+          opacity: 1,
+          scale: 1,
+          rotationY: 0,
+          duration: 1.2,
+          ease: "back.out(1.7)",
+          stagger: {
+            amount: 0.8,
+            from: "center"
+          },
+          scrollTrigger: {
+            trigger: productsRef.current,
+            start: "top 70%",
+            end: "bottom 30%",
+            toggleActions: "play none none reverse"
+          }
+        }
+      );
+
+      // Add advanced 3D card interactions
+      productCards.forEach(card => {
+        LotayaAnimations.card3D(card);
+      });
+    }
+
+    // Models section with wave animation
+    const modelCards = modelsRef.current?.querySelectorAll('.model-card');
+    if (modelCards) {
+      gsap.fromTo(modelCards,
+        { 
+          x: -100, 
+          opacity: 0,
+          rotationZ: -5
+        },
+        {
+          x: 0,
+          opacity: 1,
+          rotationZ: 0,
+          duration: 1,
+          ease: "power3.out",
+          stagger: {
+            amount: 1.2,
+            from: "start"
+          },
+          scrollTrigger: {
+            trigger: modelsRef.current,
+            start: "top 80%",
+            toggleActions: "play none none reverse"
+          }
+        }
+      );
+    }
+
+    // Effects section with bounce and wiggle
+    const effectTags = effectsRef.current?.querySelectorAll('.effect-tag');
+    if (effectTags) {
+      effectTags.forEach((tag, i) => {
+        gsap.fromTo(tag,
+          {
+            scale: 0,
+            rotation: Math.random() * 360
+          },
+          {
+            scale: 1,
+            rotation: 0,
+            duration: 0.8,
+            ease: "elastic.out(1, 0.3)",
+            delay: i * 0.1,
+            scrollTrigger: {
+              trigger: effectsRef.current,
+              start: "top 80%",
+              toggleActions: "play none none reverse"
+            }
+          }
+        );
+      });
+    }
+
+    // Floating animations with custom paths
+    const floatElements = document.querySelectorAll('.float-element');
+    floatElements.forEach((element, i) => {
+      gsap.to(element, {
+        y: -30 + (i * 10),
+        rotation: 5 - (i * 2),
+        duration: 3 + (i * 0.5),
+        ease: "sine.inOut",
+        yoyo: true,
+        repeat: -1
       });
     });
 
-    // Floating animation for hero elements
-    gsap.to('.float-element', {
-      y: -20,
-      duration: 3,
-      ease: "power2.inOut",
-      yoyo: true,
-      repeat: -1
+    // Particle system enhancement
+    const particles = document.querySelectorAll('.particle');
+    particles.forEach(particle => {
+      gsap.set(particle, {
+        scale: Math.random() * 0.5 + 0.5,
+        opacity: Math.random() * 0.5 + 0.3
+      });
+      
+      gsap.to(particle, {
+        y: -window.innerHeight - 100,
+        rotation: 360,
+        duration: Math.random() * 10 + 15,
+        ease: "none",
+        repeat: -1,
+        delay: Math.random() * 10
+      });
     });
 
     return () => {
