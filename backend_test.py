@@ -13,7 +13,7 @@ import time
 
 # Load environment variables
 from dotenv import load_dotenv
-load_dotenv()
+load_dotenv("/app/backend/.env")  # Load backend .env specifically
 
 # Get backend URL from frontend .env file
 def get_backend_url():
