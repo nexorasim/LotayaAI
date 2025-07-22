@@ -118,17 +118,87 @@
   outline: none;
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .card-3d:hover {
-    transform: scale(1.02);
+/* Additional premium animation styles */
+.premium-particle {
+  background: linear-gradient(45deg, #667eea, #764ba2);
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
+}
+
+.section-title {
+  position: relative;
+  display: inline-block;
+}
+
+.morphing-icon {
+  filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.6));
+}
+
+/* Enhanced 3D transforms */
+.card-3d-premium {
+  transform-style: preserve-3d;
+  perspective: 1500px;
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-3d-premium:hover {
+  transform: scale(1.05) rotateY(15deg) rotateX(5deg);
+}
+
+/* Premium text effects */
+.scramble-text {
+  font-family: 'Orbitron', monospace;
+  font-weight: 600;
+}
+
+/* Physics-based animations */
+.physics-element {
+  will-change: transform;
+}
+
+/* Enhanced particle system */
+.particle-premium {
+  position: absolute;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
+  animation: float-premium 20s linear infinite;
+  filter: blur(0.5px);
+}
+
+@keyframes float-premium {
+  0% {
+    transform: translateY(100vh) rotate(0deg) scale(0);
+    opacity: 0;
   }
-  
-  .hero-title {
-    font-size: 2.5rem;
+  10% {
+    opacity: 1;
+    transform: scale(1);
   }
-  
-  .product-card {
-    margin-bottom: 1rem;
+  90% {
+    opacity: 1;
   }
+  100% {
+    transform: translateY(-100vh) rotate(720deg) scale(0);
+    opacity: 0;
+  }
+}
+
+/* Smooth scroll indicator */
+.scroll-indicator {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+  transform-origin: 0 0;
+  z-index: 100;
+}
+
+/* Enhanced hover states with physics */
+.hover-physics {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.hover-physics:hover {
+  transform: translateY(-8px) scale(1.02);
 }
