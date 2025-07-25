@@ -339,7 +339,7 @@ async def generate_video(request: VideoGenerationRequest):
         video_url = f"https://placeholder-video-url.com/{generation_id}.mp4"
         
         # Update database with results
-        if db:
+        if db is not None:
             await db.generations.update_one(
                 {"generation_id": generation_id},
                 {"$set": {"status": "completed", "video_url": video_url}}
@@ -358,7 +358,7 @@ async def generate_video(request: VideoGenerationRequest):
         logger.error(f"Video generation error: {e}")
         
         # Update database with error
-        if db:
+        if db is not None:
             await db.generations.update_one(
                 {"generation_id": generation_id},
                 {"$set": {"status": "failed", "error": str(e)}}
