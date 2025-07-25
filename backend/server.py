@@ -301,7 +301,7 @@ async def generate_image(request: ImageGenerationRequest):
         logger.error(f"Image generation error: {e}")
         
         # Update database with error
-        if db:
+        if db is not None:
             await db.generations.update_one(
                 {"generation_id": generation_id},
                 {"$set": {"status": "failed", "error": str(e)}}
