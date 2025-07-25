@@ -282,7 +282,7 @@ async def generate_image(request: ImageGenerationRequest):
             raise HTTPException(status_code=400, detail="Unsupported model")
         
         # Update database with results
-        if db:
+        if db is not None:
             await db.generations.update_one(
                 {"generation_id": generation_id},
                 {"$set": {"status": "completed", "images": images}}
