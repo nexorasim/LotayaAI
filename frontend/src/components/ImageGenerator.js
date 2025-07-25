@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Sparkles, Download, Settings, Wand2 } from 'lucide-react';
+import { ArrowLeft, Sparkles, Download, Settings, Wand2, Copy, Eye } from 'lucide-react';
 import axios from 'axios';
 
 const ImageGenerator = () => {
   const [prompt, setPrompt] = useState('');
-  const [model, setModel] = useState('groq');
+  const [model, setModel] = useState('gemini');
   const [size, setSize] = useState('1024x1024');
   const [style, setStyle] = useState('');
+  const [numImages, setNumImages] = useState(1);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [generatedImage, setGeneratedImage] = useState(null);
+  const [generatedImages, setGeneratedImages] = useState([]);
+  const [generationInfo, setGenerationInfo] = useState(null);
   const [error, setError] = useState('');
 
   const handleGenerate = async () => {
@@ -20,19 +22,23 @@ const ImageGenerator = () => {
 
     setIsGenerating(true);
     setError('');
+    setGeneratedImages([]);
+    setGenerationInfo(null);
     
     try {
       const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/generate/image`, {
         prompt,
         model,
         size,
-        style: style || null
+        style: style || null,
+        num_images: numImages
       });
 
       if (response.data.success) {
-        setGeneratedImage(response.data);
+        setGeneratedImages(response.data.images || []);
+        setGenerationInfo(response.data);
       } else {
-        setError('Generation failed. Please try again.');
+        setError(response.data.error || 'Generation failed. Please try again.');
       }
     } catch (err) {
       setError('Network error. Please check your connection.');
@@ -42,10 +48,23 @@ const ImageGenerator = () => {
     }
   };
 
+  const downloadImage = (imageData, index) => {
+    const link = document.createElement('a');
+    link.href = imageData;
+    link.download = `lotayaai-generated-${index + 1}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text);
+  };
+
   const models = [
-    { id: 'groq', name: 'GROQ AI', description: 'Fast and efficient generation' },
+    { id: 'gemini', name: 'Google Gemini', description: 'Imagen 3.0 - High-quality results' },
     { id: 'xai', name: 'XAI Grok', description: 'Advanced creative AI' },
-    { id: 'gemini', name: 'Google Gemini', description: 'High-quality results' }
+    { id: 'groq', name: 'GROQ AI', description: 'Fast and efficient generation' }
   ];
 
   const sizes = ['512x512', '1024x1024', '1024x768', '768x1024'];
@@ -126,6 +145,21 @@ const ImageGenerator = () => {
                 </div>
               </div>
 
+              {/* Number of Images */}
+              <div className="mb-6">
+                <label className="block text-sm font-semibold mb-2">Number of Images</label>
+                <select
+                  value={numImages}
+                  onChange={(e) => setNumImages(parseInt(e.target.value))}
+                  className="form-input w-full px-4 py-3 rounded-lg text-white"
+                >
+                  <option value={1}>1 Image</option>
+                  <option value={2}>2 Images</option>
+                  <option value={3}>3 Images</option>
+                  <option value={4}>4 Images</option>
+                </select>
+              </div>
+
               {/* Size Selection */}
               <div className="mb-6">
                 <label className="block text-sm font-semibold mb-2">Image Size</label>
@@ -185,28 +219,61 @@ const ImageGenerator = () => {
 
             {/* Result Panel */}
             <div className="glass p-8 rounded-2xl">
-              <h2 className="text-2xl font-bold mb-6">Generated Image</h2>
+              <h2 className="text-2xl font-bold mb-6">Generated Images</h2>
               
-              {generatedImage ? (
-                <div className="space-y-4">
-                  <div className="bg-gray-800 rounded-lg p-4 min-h-64 flex items-center justify-center">
-                    <div className="text-center text-gray-400">
-                      <Sparkles className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                      <p>Image generated successfully!</p>
-                      <p className="text-sm mt-2">Model: {generatedImage.model_used}</p>
-                      <p className="text-sm">Generation ID: {generatedImage.generation_id}</p>
+              {generatedImages.length > 0 ? (
+                <div className="space-y-6">
+                  {/* Generation Info */}
+                  {generationInfo && (
+                    <div className="bg-gray-800 rounded-lg p-4 mb-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-semibold">Generation Info</span>
+                        <button
+                          onClick={() => copyToClipboard(generationInfo.generation_id)}
+                          className="text-blue-400 hover:text-blue-300 transition-colors"
+                        >
+                          <Copy className="w-4 h-4" />
+                        </button>
+                      </div>
+                      <p className="text-sm text-gray-300">Model: {generationInfo.model_used}</p>
+                      <p className="text-sm text-gray-300">ID: {generationInfo.generation_id}</p>
                     </div>
+                  )}
+
+                  {/* Images Grid */}
+                  <div className="grid grid-cols-1 gap-4">
+                    {generatedImages.map((imageData, index) => (
+                      <div key={index} className="bg-gray-800 rounded-lg p-4">
+                        <img
+                          src={imageData}
+                          alt={`Generated image ${index + 1}`}
+                          className="w-full h-auto rounded-lg mb-4"
+                        />
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() => downloadImage(imageData, index)}
+                            className="flex-1 btn-secondary py-2 rounded-lg font-semibold flex items-center justify-center space-x-2"
+                          >
+                            <Download className="w-4 h-4" />
+                            <span>Download</span>
+                          </button>
+                          <button
+                            onClick={() => window.open(imageData, '_blank')}
+                            className="flex-1 btn-primary py-2 rounded-lg font-semibold flex items-center justify-center space-x-2"
+                          >
+                            <Eye className="w-4 h-4" />
+                            <span>View</span>
+                          </button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                  <button className="w-full btn-secondary py-3 rounded-lg font-semibold flex items-center justify-center space-x-2">
-                    <Download className="w-5 h-5" />
-                    <span>Download Image</span>
-                  </button>
                 </div>
               ) : (
                 <div className="bg-gray-800 rounded-lg p-8 min-h-64 flex items-center justify-center">
                   <div className="text-center text-gray-500">
                     <Sparkles className="w-16 h-16 mx-auto mb-4 opacity-30" />
-                    <p>Your generated image will appear here</p>
+                    <p>Your generated images will appear here</p>
                   </div>
                 </div>
               )}
