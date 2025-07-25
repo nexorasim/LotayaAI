@@ -108,108 +108,452 @@ class BackendTester:
         except requests.exceptions.RequestException as e:
             self.log_test("Models Endpoint", False, f"Connection error: {str(e)}")
             
-    def test_image_generation_valid(self):
-        """Test POST /api/generate/image with valid data"""
-        print("\n🔍 Testing Image Generation - Valid Requests...")
+    def test_ai_image_generation_comprehensive(self):
+        """Comprehensive AI Image Generation Testing - Focus on specific requirements"""
+        print("\n🎨 Testing AI Image Generation - Comprehensive Suite...")
         
-        test_cases = [
-            {
-                "name": "GROQ Model",
-                "payload": {
-                    "prompt": "A beautiful sunset over mountains with vibrant colors",
-                    "model": "groq",
-                    "style": "realistic",
-                    "size": "1024x1024"
-                }
-            },
-            {
-                "name": "XAI Model",
-                "payload": {
-                    "prompt": "Futuristic cityscape with flying cars",
-                    "model": "xai",
-                    "style": "cyberpunk",
-                    "size": "512x512"
-                }
-            },
-            {
-                "name": "Gemini Model",
-                "payload": {
-                    "prompt": "Abstract art with geometric patterns",
-                    "model": "gemini"
-                }
+        # Test Case 1: Generate image with Gemini model
+        print("\n🔍 Test Case 1: Gemini Model - Beautiful sunset over mountains")
+        try:
+            payload = {
+                "prompt": "A beautiful sunset over mountains",
+                "model": "gemini",
+                "style": "realistic",
+                "size": "1024x1024",
+                "num_images": 1
             }
+            
+            response = self.session.post(
+                f"{self.base_url}/api/generate/image",
+                json=payload,
+                timeout=120  # Longer timeout for actual AI generation
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                # Verify response structure
+                required_fields = ["success", "message", "model_used", "prompt", "generation_id", "images"]
+                missing_fields = [field for field in required_fields if field not in data]
+                
+                if not missing_fields and data.get("success") is True:
+                    # Verify base64 images are returned
+                    images = data.get("images", [])
+                    if images and len(images) > 0:
+                        # Check if image is base64 encoded
+                        first_image = images[0]
+                        if first_image.startswith("data:image/") and "base64," in first_image:
+                            # Extract base64 part and validate
+                            base64_part = first_image.split("base64,")[1]
+                            try:
+                                base64.b64decode(base64_part)
+                                self.log_test("AI Image Generation - Gemini Model", True, 
+                                            f"Generated {len(images)} base64 image(s), ID: {data.get('generation_id')}")
+                            except Exception as e:
+                                self.log_test("AI Image Generation - Gemini Model", False, 
+                                            f"Invalid base64 image data: {str(e)}")
+                        else:
+                            self.log_test("AI Image Generation - Gemini Model", False, 
+                                        f"Image not in expected base64 format: {first_image[:100]}...")
+                    else:
+                        self.log_test("AI Image Generation - Gemini Model", False, 
+                                    "No images returned in response")
+                else:
+                    self.log_test("AI Image Generation - Gemini Model", False, 
+                                f"Missing fields: {missing_fields} or success=False")
+            else:
+                self.log_test("AI Image Generation - Gemini Model", False, 
+                            f"HTTP {response.status_code}: {response.text}")
+                
+        except requests.exceptions.RequestException as e:
+            self.log_test("AI Image Generation - Gemini Model", False, f"Connection error: {str(e)}")
+        
+        # Test Case 2: Generate image with XAI model
+        print("\n🔍 Test Case 2: XAI Model - Futuristic city skyline")
+        try:
+            payload = {
+                "prompt": "A futuristic city skyline",
+                "model": "xai",
+                "style": "cyberpunk",
+                "size": "1024x1024",
+                "num_images": 1
+            }
+            
+            response = self.session.post(
+                f"{self.base_url}/api/generate/image",
+                json=payload,
+                timeout=120
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success") and data.get("images"):
+                    images = data.get("images", [])
+                    if images and images[0].startswith("data:image/"):
+                        self.log_test("AI Image Generation - XAI Model", True, 
+                                    f"Generated {len(images)} base64 image(s), ID: {data.get('generation_id')}")
+                    else:
+                        self.log_test("AI Image Generation - XAI Model", False, 
+                                    "Images not in expected format")
+                else:
+                    self.log_test("AI Image Generation - XAI Model", False, 
+                                f"Generation failed or no images: {data}")
+            else:
+                self.log_test("AI Image Generation - XAI Model", False, 
+                            f"HTTP {response.status_code}: {response.text}")
+                
+        except requests.exceptions.RequestException as e:
+            self.log_test("AI Image Generation - XAI Model", False, f"Connection error: {str(e)}")
+        
+        # Test Case 3: Generate image with GROQ model
+        print("\n🔍 Test Case 3: GROQ Model - Cute cat playing with a ball")
+        try:
+            payload = {
+                "prompt": "A cute cat playing with a ball",
+                "model": "groq",
+                "style": "cartoon",
+                "size": "512x512",
+                "num_images": 1
+            }
+            
+            response = self.session.post(
+                f"{self.base_url}/api/generate/image",
+                json=payload,
+                timeout=120
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success") and data.get("images"):
+                    images = data.get("images", [])
+                    if images and images[0].startswith("data:image/"):
+                        self.log_test("AI Image Generation - GROQ Model", True, 
+                                    f"Generated {len(images)} base64 image(s), ID: {data.get('generation_id')}")
+                    else:
+                        self.log_test("AI Image Generation - GROQ Model", False, 
+                                    "Images not in expected format")
+                else:
+                    self.log_test("AI Image Generation - GROQ Model", False, 
+                                f"Generation failed or no images: {data}")
+            else:
+                self.log_test("AI Image Generation - GROQ Model", False, 
+                            f"HTTP {response.status_code}: {response.text}")
+                
+        except requests.exceptions.RequestException as e:
+            self.log_test("AI Image Generation - GROQ Model", False, f"Connection error: {str(e)}")
+        
+        # Test Case 4: Multiple images generation
+        print("\n🔍 Test Case 4: Multiple Images Generation (num_images: 2)")
+        try:
+            payload = {
+                "prompt": "Abstract geometric patterns in vibrant colors",
+                "model": "gemini",
+                "num_images": 2,
+                "size": "1024x1024"
+            }
+            
+            response = self.session.post(
+                f"{self.base_url}/api/generate/image",
+                json=payload,
+                timeout=120
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success") and data.get("images"):
+                    images = data.get("images", [])
+                    if len(images) == 2:
+                        all_valid = all(img.startswith("data:image/") for img in images)
+                        if all_valid:
+                            self.log_test("AI Image Generation - Multiple Images", True, 
+                                        f"Generated {len(images)} base64 images as requested")
+                        else:
+                            self.log_test("AI Image Generation - Multiple Images", False, 
+                                        "Not all images in valid base64 format")
+                    else:
+                        self.log_test("AI Image Generation - Multiple Images", False, 
+                                    f"Expected 2 images, got {len(images)}")
+                else:
+                    self.log_test("AI Image Generation - Multiple Images", False, 
+                                f"Generation failed: {data}")
+            else:
+                self.log_test("AI Image Generation - Multiple Images", False, 
+                            f"HTTP {response.status_code}: {response.text}")
+                
+        except requests.exceptions.RequestException as e:
+            self.log_test("AI Image Generation - Multiple Images", False, f"Connection error: {str(e)}")
+        
+        # Test Case 5: Different sizes and styles
+        print("\n🔍 Test Case 5: Different Sizes and Styles")
+        test_variations = [
+            {"size": "512x512", "style": "photorealistic", "model": "xai"},
+            {"size": "1024x1024", "style": "artistic", "model": "groq"},
+            {"size": "768x768", "style": "minimalist", "model": "gemini"}
         ]
         
-        for test_case in test_cases:
+        for i, variation in enumerate(test_variations):
             try:
+                payload = {
+                    "prompt": f"A serene landscape with {variation['style']} style",
+                    "model": variation["model"],
+                    "style": variation["style"],
+                    "size": variation["size"],
+                    "num_images": 1
+                }
+                
                 response = self.session.post(
                     f"{self.base_url}/api/generate/image",
-                    json=test_case["payload"],
-                    timeout=10
+                    json=payload,
+                    timeout=120
                 )
                 
                 if response.status_code == 200:
                     data = response.json()
-                    required_fields = ["success", "message", "model_used", "prompt", "generation_id"]
-                    missing_fields = [field for field in required_fields if field not in data]
-                    
-                    if not missing_fields and data.get("success") is True:
-                        self.log_test(f"Image Generation - {test_case['name']}", True, 
-                                    f"Model: {data.get('model_used')}, ID: {data.get('generation_id')}")
+                    if data.get("success") and data.get("images"):
+                        self.log_test(f"AI Image Generation - Size/Style Variation {i+1}", True, 
+                                    f"Model: {variation['model']}, Size: {variation['size']}, Style: {variation['style']}")
                     else:
-                        self.log_test(f"Image Generation - {test_case['name']}", False, 
-                                    f"Missing fields: {missing_fields} or success=False")
+                        self.log_test(f"AI Image Generation - Size/Style Variation {i+1}", False, 
+                                    f"Generation failed: {data}")
                 else:
-                    self.log_test(f"Image Generation - {test_case['name']}", False, 
-                                f"HTTP {response.status_code}: {response.text}")
+                    self.log_test(f"AI Image Generation - Size/Style Variation {i+1}", False, 
+                                f"HTTP {response.status_code}")
                     
             except requests.exceptions.RequestException as e:
-                self.log_test(f"Image Generation - {test_case['name']}", False, f"Connection error: {str(e)}")
-                
-    def test_image_generation_invalid(self):
-        """Test POST /api/generate/image with invalid data"""
-        print("\n🔍 Testing Image Generation - Invalid Requests...")
+                self.log_test(f"AI Image Generation - Size/Style Variation {i+1}", False, f"Connection error: {str(e)}")
+    
+    def test_ai_image_generation_error_handling(self):
+        """Test AI Image Generation Error Handling"""
+        print("\n🚨 Testing AI Image Generation - Error Handling...")
         
-        test_cases = [
-            {
-                "name": "Missing Prompt",
-                "payload": {"model": "groq"},
-                "expected_status": 422
-            },
-            {
-                "name": "Invalid Model",
-                "payload": {"prompt": "test prompt", "model": "invalid_model"},
-                "expected_status": [200, 400, 422]  # Could be handled differently
-            },
-            {
-                "name": "Empty Payload",
-                "payload": {},
-                "expected_status": 422
+        # Test Case 6: Empty prompt
+        print("\n🔍 Test Case 6: Error Handling - Empty Prompt")
+        try:
+            payload = {
+                "prompt": "",
+                "model": "gemini"
             }
-        ]
-        
-        for test_case in test_cases:
-            try:
-                response = self.session.post(
-                    f"{self.base_url}/api/generate/image",
-                    json=test_case["payload"],
-                    timeout=10
-                )
-                
-                expected_statuses = test_case["expected_status"]
-                if isinstance(expected_statuses, int):
-                    expected_statuses = [expected_statuses]
-                    
-                if response.status_code in expected_statuses:
-                    self.log_test(f"Image Generation Error Handling - {test_case['name']}", True, 
-                                f"HTTP {response.status_code} as expected")
+            
+            response = self.session.post(
+                f"{self.base_url}/api/generate/image",
+                json=payload,
+                timeout=30
+            )
+            
+            # Should return error for empty prompt
+            if response.status_code in [400, 422]:
+                self.log_test("AI Image Generation - Empty Prompt Error", True, 
+                            f"Properly rejected empty prompt with HTTP {response.status_code}")
+            elif response.status_code == 200:
+                data = response.json()
+                if not data.get("success"):
+                    self.log_test("AI Image Generation - Empty Prompt Error", True, 
+                                "Properly handled empty prompt with success=false")
                 else:
-                    self.log_test(f"Image Generation Error Handling - {test_case['name']}", False, 
-                                f"Expected {expected_statuses}, got {response.status_code}")
+                    self.log_test("AI Image Generation - Empty Prompt Error", False, 
+                                "Should not succeed with empty prompt")
+            else:
+                self.log_test("AI Image Generation - Empty Prompt Error", False, 
+                            f"Unexpected status code: {response.status_code}")
+                
+        except requests.exceptions.RequestException as e:
+            self.log_test("AI Image Generation - Empty Prompt Error", False, f"Connection error: {str(e)}")
+        
+        # Test Case 7: Invalid model
+        print("\n🔍 Test Case 7: Error Handling - Invalid Model")
+        try:
+            payload = {
+                "prompt": "A beautiful landscape",
+                "model": "invalid_model_name"
+            }
+            
+            response = self.session.post(
+                f"{self.base_url}/api/generate/image",
+                json=payload,
+                timeout=30
+            )
+            
+            if response.status_code in [400, 422]:
+                self.log_test("AI Image Generation - Invalid Model Error", True, 
+                            f"Properly rejected invalid model with HTTP {response.status_code}")
+            elif response.status_code == 200:
+                data = response.json()
+                if not data.get("success"):
+                    self.log_test("AI Image Generation - Invalid Model Error", True, 
+                                "Properly handled invalid model with success=false")
+                else:
+                    self.log_test("AI Image Generation - Invalid Model Error", False, 
+                                "Should not succeed with invalid model")
+            else:
+                self.log_test("AI Image Generation - Invalid Model Error", False, 
+                            f"Unexpected status code: {response.status_code}")
+                
+        except requests.exceptions.RequestException as e:
+            self.log_test("AI Image Generation - Invalid Model Error", False, f"Connection error: {str(e)}")
+    
+    def test_database_integration(self):
+        """Test Database Integration for Generation Records"""
+        print("\n🗄️ Testing Database Integration...")
+        
+        # Generate an image and get the generation_id
+        print("\n🔍 Testing Database Storage of Generation Records")
+        try:
+            payload = {
+                "prompt": "Database integration test image",
+                "model": "gemini",
+                "num_images": 1
+            }
+            
+            response = self.session.post(
+                f"{self.base_url}/api/generate/image",
+                json=payload,
+                timeout=120
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success") and data.get("generation_id"):
+                    generation_id = data.get("generation_id")
                     
-            except requests.exceptions.RequestException as e:
-                self.log_test(f"Image Generation Error Handling - {test_case['name']}", False, 
-                            f"Connection error: {str(e)}")
+                    # Test the status endpoint with this generation_id
+                    time.sleep(2)  # Give database time to update
+                    
+                    status_response = self.session.get(
+                        f"{self.base_url}/api/generations/{generation_id}",
+                        timeout=30
+                    )
+                    
+                    if status_response.status_code == 200:
+                        status_data = status_response.json()
+                        
+                        # Check if the generation record exists and has expected fields
+                        expected_fields = ["generation_id", "status", "progress"]
+                        missing_fields = [field for field in expected_fields if field not in status_data]
+                        
+                        if not missing_fields:
+                            # Check if the status indicates completion or processing
+                            status = status_data.get("status")
+                            if status in ["completed", "processing", "failed"]:
+                                self.log_test("Database Integration - Generation Storage", True, 
+                                            f"Generation record stored and retrieved, Status: {status}")
+                            else:
+                                self.log_test("Database Integration - Generation Storage", False, 
+                                            f"Unexpected status: {status}")
+                        else:
+                            self.log_test("Database Integration - Generation Storage", False, 
+                                        f"Missing fields in status response: {missing_fields}")
+                    else:
+                        self.log_test("Database Integration - Generation Storage", False, 
+                                    f"Status endpoint failed: HTTP {status_response.status_code}")
+                else:
+                    self.log_test("Database Integration - Generation Storage", False, 
+                                "Image generation failed or no generation_id returned")
+            else:
+                self.log_test("Database Integration - Generation Storage", False, 
+                            f"Image generation request failed: HTTP {response.status_code}")
+                
+        except requests.exceptions.RequestException as e:
+            self.log_test("Database Integration - Generation Storage", False, f"Connection error: {str(e)}")
+    
+    def test_generation_status_endpoint(self):
+        """Test /api/generations/{id} endpoint comprehensively"""
+        print("\n📊 Testing Generation Status Endpoint...")
+        
+        # Test with a real generation ID (from previous test)
+        print("\n🔍 Testing Status Endpoint with Real Generation")
+        try:
+            # First create a generation
+            payload = {
+                "prompt": "Status endpoint test image",
+                "model": "groq",
+                "num_images": 1
+            }
+            
+            response = self.session.post(
+                f"{self.base_url}/api/generate/image",
+                json=payload,
+                timeout=120
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("generation_id"):
+                    generation_id = data.get("generation_id")
+                    
+                    # Test status endpoint
+                    time.sleep(1)  # Brief wait
+                    status_response = self.session.get(
+                        f"{self.base_url}/api/generations/{generation_id}",
+                        timeout=30
+                    )
+                    
+                    if status_response.status_code == 200:
+                        status_data = status_response.json()
+                        
+                        # Verify response structure
+                        required_fields = ["generation_id", "status", "progress"]
+                        missing_fields = [field for field in required_fields if field not in status_data]
+                        
+                        if not missing_fields:
+                            status = status_data.get("status")
+                            progress = status_data.get("progress")
+                            
+                            # Check if images are included for completed generations
+                            if status == "completed" and "images" in status_data:
+                                images = status_data.get("images", [])
+                                if images:
+                                    self.log_test("Generation Status - Real ID", True, 
+                                                f"Status: {status}, Progress: {progress}%, Images: {len(images)}")
+                                else:
+                                    self.log_test("Generation Status - Real ID", True, 
+                                                f"Status: {status}, Progress: {progress}% (no images)")
+                            else:
+                                self.log_test("Generation Status - Real ID", True, 
+                                            f"Status: {status}, Progress: {progress}%")
+                        else:
+                            self.log_test("Generation Status - Real ID", False, 
+                                        f"Missing required fields: {missing_fields}")
+                    else:
+                        self.log_test("Generation Status - Real ID", False, 
+                                    f"Status endpoint failed: HTTP {status_response.status_code}")
+                else:
+                    self.log_test("Generation Status - Real ID", False, 
+                                "No generation_id returned from image generation")
+            else:
+                self.log_test("Generation Status - Real ID", False, 
+                            f"Image generation failed: HTTP {response.status_code}")
+                
+        except requests.exceptions.RequestException as e:
+            self.log_test("Generation Status - Real ID", False, f"Connection error: {str(e)}")
+        
+        # Test with non-existent ID
+        print("\n🔍 Testing Status Endpoint with Non-existent ID")
+        try:
+            fake_id = "non_existent_generation_id_12345"
+            response = self.session.get(f"{self.base_url}/api/generations/{fake_id}", timeout=30)
+            
+            if response.status_code == 200:
+                data = response.json()
+                status = data.get("status")
+                
+                # Should return not_found or similar status
+                if status in ["not_found", "unknown"]:
+                    self.log_test("Generation Status - Non-existent ID", True, 
+                                f"Properly handled non-existent ID with status: {status}")
+                else:
+                    self.log_test("Generation Status - Non-existent ID", False, 
+                                f"Unexpected status for non-existent ID: {status}")
+            else:
+                # 404 would also be acceptable
+                if response.status_code == 404:
+                    self.log_test("Generation Status - Non-existent ID", True, 
+                                "Properly returned 404 for non-existent ID")
+                else:
+                    self.log_test("Generation Status - Non-existent ID", False, 
+                                f"Unexpected status code: {response.status_code}")
+                
+        except requests.exceptions.RequestException as e:
+            self.log_test("Generation Status - Non-existent ID", False, f"Connection error: {str(e)}")
                 
     def test_video_generation_valid(self):
         """Test POST /api/generate/video with valid data"""
