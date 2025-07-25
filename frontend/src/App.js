@@ -14,16 +14,16 @@ function AppContent() {
   
   useGSAP(() => {
     // Initialize smooth scrolling for all pages
-    GSAPAnimations.scroll.initSmoother();
+    GSAPAnimations.initSmoother();
     
     // Page transition on route change
     const mainContent = document.querySelector('.app-content');
     if (mainContent) {
-      GSAPAnimations.pageTransition.enter(mainContent);
+      GSAPAnimations.pageEnter(mainContent);
     }
 
     return () => {
-      GSAPAnimations.utils.cleanup();
+      GSAPAnimations.cleanup();
     };
   }, [location.pathname]);
 
