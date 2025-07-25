@@ -322,7 +322,7 @@ async def generate_video(request: VideoGenerationRequest):
         generation_id = str(uuid.uuid4())
         
         # Store generation request in database
-        if db:
+        if db is not None:
             generation_doc = {
                 "generation_id": generation_id,
                 "type": "video",
