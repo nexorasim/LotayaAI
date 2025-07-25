@@ -419,7 +419,7 @@ async def text_to_video(request: TextToVideoRequest):
 @app.get("/api/generations/{generation_id}")
 async def get_generation_status(generation_id: str):
     try:
-        if db:
+        if db is not None:
             generation = await db.generations.find_one({"generation_id": generation_id})
             if generation:
                 return {
