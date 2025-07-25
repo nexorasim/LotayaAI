@@ -256,7 +256,7 @@ async def generate_image(request: ImageGenerationRequest):
         generation_id = str(uuid.uuid4())
         
         # Store generation request in database
-        if db:
+        if db is not None:
             generation_doc = {
                 "generation_id": generation_id,
                 "type": "image",
