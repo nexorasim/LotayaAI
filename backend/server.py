@@ -111,61 +111,31 @@ async def generate_image_gemini(prompt: str, num_images: int = 1) -> List[str]:
         raise HTTPException(status_code=500, detail=f"Gemini image generation failed: {str(e)}")
 
 async def generate_image_groq(prompt: str, num_images: int = 1) -> List[str]:
-    """Generate images using GROQ API (using Llama 3.2 vision model for image understanding)"""
+    """Generate images using GROQ API (using placeholder since GROQ doesn't support image generation)"""
     try:
         # Note: GROQ's Llama 3.2 models are primarily for image understanding/reasoning
-        # For actual image generation, we'll use a placeholder response
-        # In production, you would integrate with actual image generation APIs
+        # GROQ doesn't support image generation, so we'll create placeholder images directly
         
-        async with httpx.AsyncClient() as client:
-            headers = {
-                "Authorization": f"Bearer {GROQ_API_KEY}",
-                "Content-Type": "application/json"
-            }
+        placeholder_images = []
+        for i in range(num_images):
+            # Create a simple colored rectangle as placeholder
+            from PIL import Image, ImageDraw
+            import random
             
-            data = {
-                "model": "llama-3.2-90b-vision-preview",
-                "messages": [
-                    {
-                        "role": "user",
-                        "content": f"Generate a detailed description for creating an image with this prompt: {prompt}"
-                    }
-                ],
-                "max_tokens": 500
-            }
+            img = Image.new('RGB', (1024, 1024), color=(
+                random.randint(50, 200),
+                random.randint(50, 200),
+                random.randint(50, 200)
+            ))
+            draw = ImageDraw.Draw(img)
+            draw.text((50, 50), f"GROQ Generated Image\n{prompt[:50]}...", fill=(255, 255, 255))
             
-            response = await client.post(
-                "https://api.groq.com/openai/v1/chat/completions",
-                json=data,
-                headers=headers,
-                timeout=60.0
-            )
-            
-            if response.status_code == 200:
-                # For now, return a placeholder response
-                # In production, use the description to call an actual image generation API
-                placeholder_images = []
-                for i in range(num_images):
-                    # Create a simple colored rectangle as placeholder
-                    from PIL import Image, ImageDraw
-                    import random
-                    
-                    img = Image.new('RGB', (1024, 1024), color=(
-                        random.randint(50, 200),
-                        random.randint(50, 200),
-                        random.randint(50, 200)
-                    ))
-                    draw = ImageDraw.Draw(img)
-                    draw.text((50, 50), f"GROQ Generated Image\n{prompt[:50]}...", fill=(255, 255, 255))
-                    
-                    buffer = BytesIO()
-                    img.save(buffer, format='PNG')
-                    base64_str = base64.b64encode(buffer.getvalue()).decode('utf-8')
-                    placeholder_images.append(f"data:image/png;base64,{base64_str}")
-                
-                return placeholder_images
-            else:
-                raise HTTPException(status_code=response.status_code, detail="GROQ API request failed")
+            buffer = BytesIO()
+            img.save(buffer, format='PNG')
+            base64_str = base64.b64encode(buffer.getvalue()).decode('utf-8')
+            placeholder_images.append(f"data:image/png;base64,{base64_str}")
+        
+        return placeholder_images
                 
     except Exception as e:
         logger.error(f"GROQ image generation error: {e}")
