@@ -372,7 +372,7 @@ async def text_to_video(request: TextToVideoRequest):
         generation_id = str(uuid.uuid4())
         
         # Store generation request in database
-        if db:
+        if db is not None:
             generation_doc = {
                 "generation_id": generation_id,
                 "type": "text_to_video",
@@ -389,7 +389,7 @@ async def text_to_video(request: TextToVideoRequest):
         video_url = f"https://placeholder-video-url.com/{generation_id}.mp4"
         
         # Update database with results
-        if db:
+        if db is not None:
             await db.generations.update_one(
                 {"generation_id": generation_id},
                 {"$set": {"status": "completed", "video_url": video_url}}
@@ -408,7 +408,7 @@ async def text_to_video(request: TextToVideoRequest):
         logger.error(f"Text to video conversion error: {e}")
         
         # Update database with error
-        if db:
+        if db is not None:
             await db.generations.update_one(
                 {"generation_id": generation_id},
                 {"$set": {"status": "failed", "error": str(e)}}
