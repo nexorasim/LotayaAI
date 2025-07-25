@@ -758,20 +758,23 @@ class BackendTester:
             self.log_test("MongoDB Connection", False, f"Backend not accessible: {str(e)}")
             
     def run_all_tests(self):
-        """Run all test suites"""
-        print("🚀 Starting LotayaAI Backend API Comprehensive Test Suite")
+        """Run all test suites with focus on AI Image Generation"""
+        print("🚀 Starting LotayaAI Backend API - AI Image Generation Test Suite")
         print("=" * 60)
         
         # Test basic connectivity first
         self.test_health_endpoint()
         self.test_models_endpoint()
         
-        # Test core functionality
-        self.test_image_generation_valid()
-        self.test_image_generation_invalid()
+        # Focus on AI Image Generation functionality
+        self.test_ai_image_generation_comprehensive()
+        self.test_ai_image_generation_error_handling()
+        self.test_database_integration()
+        self.test_generation_status_endpoint()
+        
+        # Test other core functionality
         self.test_video_generation_valid()
         self.test_text_to_video_valid()
-        self.test_generation_status()
         
         # Test configuration
         self.test_cors_configuration()
