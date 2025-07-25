@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-LotayaAI Backend API Comprehensive Test Suite
-Tests all backend endpoints with various scenarios including error handling
+LotayaAI Backend API Comprehensive Test Suite - AI Image Generation Focus
+Tests AI Image Generation functionality with different models, parameters, and error handling
 """
 
 import requests
@@ -10,6 +10,8 @@ import os
 import sys
 from typing import Dict, Any
 import time
+import base64
+import re
 
 # Load environment variables
 from dotenv import load_dotenv
